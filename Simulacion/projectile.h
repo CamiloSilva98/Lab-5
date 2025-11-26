@@ -10,6 +10,7 @@ private:
     double radius;
     int owner;
     bool active;
+    int bounceCount;
     QGraphicsEllipseItem* graphicsItem;
 
     static constexpr double g = 9.81;
@@ -21,6 +22,8 @@ public:
     int getOwner() const;
     bool isActive() const;
     void deactivate();
+    int getBounceCount() const;
+    void incrementBounce();
 
     void setGraphicsItem(QGraphicsEllipseItem* item);
     QGraphicsEllipseItem* getGraphicsItem();

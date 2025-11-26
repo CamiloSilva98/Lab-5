@@ -3,9 +3,9 @@
 
 GameManager::GameManager(double arenaWidth, double arenaHeight)
     : currentPlayer(1), currentProjectile(nullptr),
-    projectileInFlight(false),
-    player1Pos(50, arenaHeight - 50),
-    player2Pos(arenaWidth - 50, arenaHeight - 50) {
+    projectileInFlight(false), projectileTimer(0.0),
+    player1Pos(30, 30),  // Esquina superior izquierda
+    player2Pos(arenaWidth - 30, 30) {  // Esquina superior derecha
     physics = new PhysicsEngine(arenaWidth, arenaHeight);
 }
 
@@ -47,26 +47,39 @@ void GameManager::launchProjectile(double angle, double speed) {
     // Convertir ángulo a radianes y calcular velocidad inicial
     double angleRad = angle * M_PI / 180.0;
 
-    // Ajustar dirección según el jugador
+    // Ajustar dirección según el jugador (desde esquinas superiores hacia abajo)
     double direction = (currentPlayer == 1) ? 1.0 : -1.0;
     Vector2D velocity(direction * speed * std::cos(angleRad),
-                      -speed * std::sin(angleRad));
+                      speed * std::sin(angleRad));  // Positivo para disparar hacia abajo
 
     currentProjectile = new Projectile(launchPos, velocity,
                                        1.0, 5.0, currentPlayer);
     projectileInFlight = true;
+    projectileTimer = 0.0; // Resetear el cronómetro
 }
 
 void GameManager::update(double dt) {
     if (!projectileInFlight || !currentProjectile) return;
 
+    projectileTimer += dt;
+
     physics->updateProjectile(currentProjectile, dt);
     physics->checkObstacleCollision(currentProjectile, obstacles);
 
-    // Verificar si el proyectil tiene velocidad muy baja
+    // Verificar condiciones para terminar el turno
     Vector2D vel = currentProjectile->getVelocity();
+    int bounces = currentProjectile->getBounceCount();
 
-    if (vel.magnitude() < 5.0) {
+    // Condición 1: Velocidad muy baja
+    bool velocityTooLow = vel.magnitude() < 3.0;
+
+    // Condición 2: Máximo de rebotes alcanzado
+    bool maxBouncesReached = bounces >= MAX_BOUNCES;
+
+    // Condición 3: Tiempo máximo
+    bool timeExpired = projectileTimer > 15.0;
+
+    if (velocityTooLow || maxBouncesReached || timeExpired) {
         endTurn();
     }
 }

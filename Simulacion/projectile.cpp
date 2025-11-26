@@ -24,6 +24,16 @@ void Projectile::deactivate()
     active = false;
 }
 
+int Projectile::getBounceCount() const
+{
+    return bounceCount;
+}
+
+void Projectile::incrementBounce()
+{
+    bounceCount++;
+}
+
 void Projectile::setGraphicsItem(QGraphicsEllipseItem* item)
 {
     graphicsItem = item;
@@ -40,7 +50,7 @@ void Projectile::update(double dt)
     velocity.y += g * dt;
 
     // Actualizar posición
-    position = position + velocity * dt;
+    position = position + velocity * dt + 0.5* g * dt * dt;
 }
 
 void Projectile::bounceWall(bool isVertical)

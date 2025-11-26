@@ -16,6 +16,7 @@ void PhysicsEngine::updateProjectile(Projectile* proj, double dt)
     if (pos.x - r < 0 || pos.x + r > width)
     {
         proj->bounceWall(true);
+        proj->incrementBounce();
         // Corregir posición
         if (pos.x - r < 0) pos.x = r;
         if (pos.x + r > width) pos.x = width - r;
@@ -26,6 +27,7 @@ void PhysicsEngine::updateProjectile(Projectile* proj, double dt)
     if (pos.y - r < 0 || pos.y + r > height)
     {
         proj->bounceWall(false);
+        proj->incrementBounce();
         // Corregir posición
         if (pos.y - r < 0) pos.y = r;
         if (pos.y + r > height) pos.y = height - r;
@@ -48,6 +50,7 @@ bool PhysicsEngine::checkObstacleCollision(Projectile* proj,
         Vector2D normal;
         if (obs->checkCollision(pos, r, normal))
         {
+            proj->incrementBounce();
             // Calcular daño
             double momentum = proj->getMomentum();
             double damage = DAMAGE_FACTOR * momentum;

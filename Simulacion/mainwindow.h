@@ -24,11 +24,18 @@ private:
     QLabel* angleLabel;
     QLabel* speedLabel;
     QLabel* playerLabel;
+    QLabel* bouncesLabel;
     QPushButton* launchButton;
 
     static constexpr double ARENA_WIDTH = 800;
     static constexpr double ARENA_HEIGHT = 600;
-    static constexpr double DT = 0.016;
+    static constexpr double DT = 0.03 ;
+    static constexpr double CANNON_LENGTH = 40;
+
+    QGraphicsLineItem* cannon1;
+    QGraphicsLineItem* cannon2;
+    QGraphicsEllipseItem* cannonBase1;
+    QGraphicsEllipseItem* cannonBase2;
 
     void setupUI();
     void setupGame();
@@ -39,6 +46,7 @@ private slots:
     void onLaunchClicked();
     void onAngleChanged(int value);
     void onSpeedChanged(int value);
+    void updateCannons();
 
 public:
     MainWindow(QWidget* parent = nullptr);

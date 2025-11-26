@@ -13,6 +13,9 @@ private:
     Projectile* currentProjectile;
     std::vector<Obstacle*> obstacles;
     bool projectileInFlight;
+    double projectileTimer;
+
+    static constexpr int MAX_BOUNCES = 3;
 
     Vector2D player1Pos;
     Vector2D player2Pos;
@@ -24,6 +27,8 @@ public:
     void addObstacle(Obstacle* obs);
     std::vector<Obstacle*>& getObstacles();
 
+
+
     int getCurrentPlayer() const;
     bool isProjectileInFlight() const;
     Projectile* getCurrentProjectile();
@@ -33,6 +38,7 @@ public:
     void update(double dt);
     void endTurn();
     int checkVictory();
+    int getMaxBounces() const { return MAX_BOUNCES; }
 };
 
 #endif

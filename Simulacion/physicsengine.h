@@ -9,7 +9,7 @@ class PhysicsEngine
 {
 private:
     double width, height;
-    static constexpr double RESTITUTION_COEFF = 0.7;
+    static constexpr double RESTITUTION_COEFF = 0.5;
     static constexpr double DAMAGE_FACTOR = 0.5;
 
 public:
