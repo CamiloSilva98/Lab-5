@@ -15,7 +15,7 @@ private:
     bool projectileInFlight;
     double projectileTimer;
 
-    static constexpr int MAX_BOUNCES = 3;
+    static constexpr int MAX_BOUNCES = 6;
 
     Vector2D player1Pos;
     Vector2D player2Pos;

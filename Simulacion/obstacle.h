@@ -15,6 +15,7 @@ private:
     int owner;
     QGraphicsRectItem* graphicsItem;
     QGraphicsTextItem* textItem;
+    QGraphicsPixmapItem* spriteItem;
 
 public:
     Obstacle(Vector2D pos, double w, double h, double res, int owner);
@@ -29,11 +30,15 @@ public:
 
     void setGraphicsItem(QGraphicsRectItem* item);
     void setTextItem(QGraphicsTextItem* item);
+    void setSpriteItem(QGraphicsPixmapItem* item);
     QGraphicsRectItem* getGraphicsItem();
     QGraphicsTextItem* getTextItem();
+    QGraphicsPixmapItem* getSpriteItem();
 
     void takeDamage(double damage);
     bool checkCollision(Vector2D projPos, double projRadius, Vector2D& normal) const;
+
+    double getHealthPercentage() const;
 };
 
 #endif

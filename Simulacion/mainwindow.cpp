@@ -5,6 +5,7 @@
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+    loadSprites();
     setupUI();
     setupGame();
 
@@ -16,7 +17,64 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 MainWindow::~MainWindow() {
     delete gameManager;
 }
+void MainWindow::loadSprites()
+{
+    // Cargar sprites del techo (4 estados: 100%, 75%, 50%, 25%)
+    roofSprites[0].load(":/sprits/sprites/blocksH1.png"); // 100% vida
+    roofSprites[1].load(":/sprits/sprites/blocksH2.png"); // 75% vida (usa la misma por ahora)
+    roofSprites[2].load(":/sprits/sprites/blocksH3.png"); // 50% vida
+    roofSprites[3].load(":/sprits/sprites/blocksH4.png"); // 25% vida
 
+    // Cargar sprites de los muros laterales (3 estados: 100%, 66%, 33%)
+    wallSprites[0].load(":/sprits/sprites/blocks1.png"); // 100% vida
+    wallSprites[1].load(":/sprits/sprites/blocks2.png"); // 66% vida
+    wallSprites[2].load(":/sprits/sprites/blocks3.png"); // 33% vida
+
+    // Cargar sprite del centro
+    centerSprite.load(":/sprits/sprites/centro.png");
+}
+
+QPixmap MainWindow::getSpriteForObstacle(Obstacle* obs) {
+    double healthPercent = obs->getHealthPercentage();
+    Vector2D pos = obs->getPosition();
+
+    // Determinar tipo de obstáculo por posición/tamaño
+    bool isRoof = (obs->getHeight() == 50);     // Techo: altura 50
+    bool isCenter = (obs->getWidth() == 80);    // Centro: ancho 80
+    bool isWall = !isRoof && !isCenter;         // Muros: el resto
+
+    QPixmap sprite;
+
+    if (isRoof) {
+        // TECHO: 4 estados según vida
+        if (healthPercent > 75) {
+            sprite = roofSprites[0]; // 100-75%
+        } else if (healthPercent > 50) {
+            sprite = roofSprites[1]; // 75-50%
+        } else if (healthPercent > 25) {
+            sprite = roofSprites[2]; // 50-25%
+        } else {
+            sprite = roofSprites[3]; // 25-0%
+        }
+    }
+    else if (isWall) {
+        // MUROS: 3 estados según vida
+        if (healthPercent > 66) {
+            sprite = wallSprites[0]; // 100-66%
+        } else if (healthPercent > 33) {
+            sprite = wallSprites[1]; // 66-33%
+        } else {
+            sprite = wallSprites[2]; // 33-0%
+        }
+    }
+    else {
+        sprite = centerSprite;
+    }
+
+    // Escalar al tamaño del obstáculo
+    return sprite.scaled(obs->getWidth(), obs->getHeight(),
+                         Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+}
 void MainWindow::setupUI() {
     QWidget* centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -24,7 +82,19 @@ void MainWindow::setupUI() {
     QVBoxLayout* mainLayout = new QVBoxLayout(centralWidget);
 
     scene = new QGraphicsScene(0, 0, ARENA_WIDTH, ARENA_HEIGHT, this);
-    scene->setBackgroundBrush(QColor(240, 240, 240)); // Fondo gris más claro
+    QPixmap backgroundImage(":/sprits/sprites/fondo1.png");
+
+    if (!backgroundImage.isNull())
+    {
+        // Si la imagen existe, usarla como fondo
+        QBrush backgroundBrush(backgroundImage.scaled(ARENA_WIDTH, ARENA_HEIGHT,
+                        Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+        scene->setBackgroundBrush(backgroundBrush);
+
+    } else {
+        // Si no existe, usar color sólido
+        scene->setBackgroundBrush(QColor(135, 206, 235)); // Azul cielo
+    }
 
     // Agregar borde al campo de juego
     scene->addRect(0, 0, ARENA_WIDTH, ARENA_HEIGHT, QPen(Qt::black, 3));
@@ -42,7 +112,7 @@ void MainWindow::setupUI() {
     playerLabel->setFont(labelFont);
     controlLayout->addWidget(playerLabel);
 
-    bouncesLabel = new QLabel("Rebotes: 0/5", this);
+    bouncesLabel = new QLabel("Rebotes: 0/6", this);
     bouncesLabel->setFont(labelFont);
     bouncesLabel->setStyleSheet("QLabel { font-weight: bold; color: #333; }");
     controlLayout->addWidget(bouncesLabel);
@@ -84,75 +154,40 @@ void MainWindow::setupGame() {
 
     // JUGADOR 1 (Izquierda) - Estructura en forma de fortaleza
     // Techo (superior)
-    gameManager->addObstacle(new Obstacle(Vector2D(70, 220), 200, 50, 100, 1));
+    gameManager->addObstacle(new Obstacle(Vector2D(50, 400), 240, 50, 1000, 1));
     // Lateral izquierdo
-    gameManager->addObstacle(new Obstacle(Vector2D(70, 270), 60, 150, 200, 1));
+    gameManager->addObstacle(new Obstacle(Vector2D(50, 450), 50, 150, 200, 1));
     // Centro con "Rival"
-    gameManager->addObstacle(new Obstacle(Vector2D(130, 270), 80, 150, 100, 1));
+    gameManager->addObstacle(new Obstacle(Vector2D(130, 520), 80, 80, 50, 1));
     // Lateral derecho
-    gameManager->addObstacle(new Obstacle(Vector2D(210, 270), 60, 150, 200, 1));
+    gameManager->addObstacle(new Obstacle(Vector2D(240, 450), 50, 150, 300, 1));
 
     // JUGADOR 2 (Derecha) - Estructura en forma de fortaleza
     // Techo (superior)
-    gameManager->addObstacle(new Obstacle(Vector2D(530, 220), 200, 50, 100, 2));
+    gameManager->addObstacle(new Obstacle(Vector2D(510, 400), 240, 50, 1000, 2));
     // Lateral izquierdo
-    gameManager->addObstacle(new Obstacle(Vector2D(530, 270), 60, 150, 200, 2));
+    gameManager->addObstacle(new Obstacle(Vector2D(510, 450), 50, 150, 300, 2));
     // Centro con "Rival"
-    gameManager->addObstacle(new Obstacle(Vector2D(590, 270), 80, 150, 100, 2));
+    gameManager->addObstacle(new Obstacle(Vector2D(590, 520), 80, 80, 50, 2));
     // Lateral derecho
-    gameManager->addObstacle(new Obstacle(Vector2D(670, 270), 60, 150, 200, 2));
+    gameManager->addObstacle(new Obstacle(Vector2D(700, 450), 50, 150, 200, 2));
 
-    // Dibujar obstáculos
-    for (auto obs : gameManager->getObstacles()) {
+    for (auto obs : gameManager->getObstacles())
+    {
         Vector2D pos = obs->getPosition();
 
-        // Determinar color según resistencia
-        QColor color;
-        if (obs->getResistance() == 200) {
-            color = obs->getOwner() == 1 ? QColor(255, 200, 100) : QColor(255, 200, 100); // Naranjo claro
-        } else {
-            color = QColor(220, 220, 220); // Gris claro para techo y centro
-        }
+        // Obtener sprite según tipo y vida
+        QPixmap sprite = getSpriteForObstacle(obs);
 
-        QGraphicsRectItem* rect = scene->addRect(
-            pos.x, pos.y, obs->getWidth(), obs->getHeight(),
-            QPen(Qt::black, 2),
-            QBrush(color)
-            );
-        obs->setGraphicsItem(rect);
-
-        // Texto de resistencia
-        QGraphicsTextItem* text = scene->addText(
-            QString::number((int)obs->getResistance())
-            );
-        QFont font = text->font();
-        font.setPointSize(14);
-        font.setBold(true);
-        text->setFont(font);
-
-        // Centrar texto en el obstáculo
-        double textX = pos.x + (obs->getWidth() - text->boundingRect().width()) / 2;
-        double textY = pos.y + (obs->getHeight() - text->boundingRect().height()) / 2;
-        text->setPos(textX, textY);
-        obs->setTextItem(text);
-
-        // Agregar etiqueta "Rival" en el centro
-        if (obs->getResistance() == 100 && obs->getWidth() == 80) {
-            QGraphicsTextItem* rivalText = scene->addText("Rival");
-            QFont rivalFont = rivalText->font();
-            rivalFont.setPointSize(10);
-            rivalFont.setBold(true);
-            rivalText->setFont(rivalFont);
-            double rivalX = pos.x + (obs->getWidth() - rivalText->boundingRect().width()) / 2;
-            double rivalY = pos.y + obs->getHeight() - 25;
-            rivalText->setPos(rivalX, rivalY);
-        }
+        // Crear item gráfico con el sprite
+        QGraphicsPixmapItem* spriteItem = scene->addPixmap(sprite);
+        spriteItem->setPos(pos.x, pos.y);
+        obs->setSpriteItem(spriteItem);
     }
-
     // Dibujar bases de cañones en las esquinas superiores
-    cannonBase1 = scene->addEllipse(10, 10, 40, 40,
+    cannonBase1 = scene->addEllipse(10, 180, 40, 40,
                                     QPen(Qt::black, 3), QBrush(Qt::darkBlue));
-    cannonBase2 = scene->addEllipse(ARENA_WIDTH - 50, 10, 40, 40,
+    cannonBase2 = scene->addEllipse(ARENA_WIDTH - 50, 180, 40, 40,
                                     QPen(Qt::black, 3), QBrush(Qt::darkRed));
 
     // Crear cañones
@@ -181,19 +216,31 @@ void MainWindow::gameLoop() {
 }
 
 void MainWindow::updateGraphics() {
+    // Actualizar obstáculos
     for (auto obs : gameManager->getObstacles()) {
+        // Actualizar texto de resistencia
         if (obs->getTextItem()) {
             obs->getTextItem()->setPlainText(
                 QString::number((int)obs->getResistance())
                 );
         }
 
-        if (obs->isDestroyed() && obs->getGraphicsItem()) {
-            obs->getGraphicsItem()->setVisible(false);
-            obs->getTextItem()->setVisible(false);
+        // Actualizar sprite según vida restante
+        if (obs->getSpriteItem() && !obs->isDestroyed())
+        {
+            QPixmap newSprite = getSpriteForObstacle(obs);
+            obs->getSpriteItem()->setPixmap(newSprite);
+        }
+
+        // Ocultar si está destruido
+        if (obs->isDestroyed())
+        {
+            if (obs->getSpriteItem()) obs->getSpriteItem()->setVisible(false);
+            if (obs->getTextItem()) obs->getTextItem()->setVisible(false);
         }
     }
 
+    // Actualizar proyectil
     Projectile* proj = gameManager->getCurrentProjectile();
     if (proj && gameManager->isProjectileInFlight()) {
         if (!proj->getGraphicsItem()) {
@@ -216,7 +263,6 @@ void MainWindow::updateGraphics() {
         int maxBounces = gameManager->getMaxBounces();
         bouncesLabel->setText(QString("Rebotes: %1/%2").arg(bounces).arg(maxBounces));
 
-        // Cambiar color si está cerca del límite
         if (bounces >= maxBounces - 1) {
             bouncesLabel->setStyleSheet("QLabel { font-weight: bold; color: red; }");
         } else {
@@ -228,7 +274,7 @@ void MainWindow::updateGraphics() {
             delete proj->getGraphicsItem();
             proj->setGraphicsItem(nullptr);
         }
-        bouncesLabel->setText("Rebotes: 0/3");
+        bouncesLabel->setText("Rebotes: 0/5");
         bouncesLabel->setStyleSheet("QLabel { font-weight: bold; color: #333; }");
     }
 
@@ -238,7 +284,6 @@ void MainWindow::updateGraphics() {
 
     launchButton->setEnabled(!gameManager->isProjectileInFlight());
 
-    // Actualizar cañones solo cuando no hay proyectil en vuelo
     if (!gameManager->isProjectileInFlight()) {
         updateCannons();
     }
@@ -267,10 +312,10 @@ void MainWindow::updateCannons() {
 
     // Posición del centro de cada cañón (esquinas superiores)
     double player1X = 30;
-    double player1Y = 30;
+    double player1Y = 200;
 
     double player2X = ARENA_WIDTH - 30;
-    double player2Y = 30;
+    double player2Y = 200;
 
     // Calcular punto final del cañón para jugador 1 (dispara a la derecha y hacia abajo)
     double endX1 = player1X + CANNON_LENGTH * std::cos(angleRad);

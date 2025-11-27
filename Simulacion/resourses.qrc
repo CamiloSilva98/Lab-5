@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/sprits">
+        <file>sprites/cadena.png</file>
+        <file>sprites/centro.png</file>
+        <file>sprites/fondo1.png</file>
+        <file>sprites/blocks1.png</file>
+        <file>sprites/blocks2.png</file>
+        <file>sprites/blocks3.png</file>
+        <file>sprites/blocksH1.png</file>
+        <file>sprites/blocksH2.png</file>
+        <file>sprites/blocksH3.png</file>
+        <file>sprites/blocksH4.png</file>
+    </qresource>
+</RCC>

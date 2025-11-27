@@ -5,72 +5,72 @@
 Obstacle::Obstacle(Vector2D pos, double w, double h, double res, int owner)
     : position(pos), width(w), height(h), resistance(res),
     maxResistance(res), owner(owner), graphicsItem(nullptr),
-    textItem(nullptr) {}
+    textItem(nullptr), spriteItem(nullptr) {}
 
-Vector2D Obstacle::getPosition() const
-{
+Vector2D Obstacle::getPosition() const {
     return position;
 }
 
-double Obstacle::getWidth() const
-{
+double Obstacle::getWidth() const {
     return width;
 }
 
-double Obstacle::getHeight() const
-{
+double Obstacle::getHeight() const {
     return height;
 }
 
-double Obstacle::getResistance() const
-{
+double Obstacle::getResistance() const {
     return resistance;
 }
 
-double Obstacle::getMaxResistance() const
-{
+double Obstacle::getMaxResistance() const {
     return maxResistance;
 }
 
-int Obstacle::getOwner() const
-{
+int Obstacle::getOwner() const {
     return owner;
 }
 
-bool Obstacle::isDestroyed() const
-{
+bool Obstacle::isDestroyed() const {
     return resistance <= 0;
 }
 
-void Obstacle::setGraphicsItem(QGraphicsRectItem* item)
-{
+void Obstacle::setGraphicsItem(QGraphicsRectItem* item) {
     graphicsItem = item;
 }
 
-void Obstacle::setTextItem(QGraphicsTextItem* item)
-{
+void Obstacle::setTextItem(QGraphicsTextItem* item) {
     textItem = item;
 }
 
-QGraphicsRectItem* Obstacle::getGraphicsItem()
-{
+void Obstacle::setSpriteItem(QGraphicsPixmapItem* item) {
+    spriteItem = item;
+}
+
+QGraphicsRectItem* Obstacle::getGraphicsItem() {
     return graphicsItem;
 }
 
-QGraphicsTextItem* Obstacle::getTextItem()
-{
+QGraphicsTextItem* Obstacle::getTextItem() {
     return textItem;
 }
 
-void Obstacle::takeDamage(double damage)
-{
+QGraphicsPixmapItem* Obstacle::getSpriteItem() {
+    return spriteItem;
+}
+
+void Obstacle::takeDamage(double damage) {
     resistance -= damage;
     if (resistance < 0) resistance = 0;
 }
 
+double Obstacle::getHealthPercentage() const {
+    if (maxResistance <= 0) return 0;
+    return (resistance / maxResistance) * 100.0;
+}
+
 bool Obstacle::checkCollision(Vector2D projPos, double projRadius,
-                              Vector2D& normal) const
-{
+                              Vector2D& normal) const {
     // Encontrar el punto más cercano del rectángulo al círculo
     double closestX = std::max(position.x,
                                std::min(projPos.x, position.x + width));
@@ -81,8 +81,7 @@ bool Obstacle::checkCollision(Vector2D projPos, double projRadius,
     double distY = projPos.y - closestY;
     double distSquared = distX * distX + distY * distY;
 
-    if (distSquared < projRadius * projRadius)
-    {
+    if (distSquared < projRadius * projRadius) {
         // Determinar qué lado fue golpeado
         double left = std::abs(projPos.x - position.x);
         double right = std::abs(projPos.x - (position.x + width));

@@ -4,8 +4,8 @@
 GameManager::GameManager(double arenaWidth, double arenaHeight)
     : currentPlayer(1), currentProjectile(nullptr),
     projectileInFlight(false), projectileTimer(0.0),
-    player1Pos(30, 30),  // Esquina superior izquierda
-    player2Pos(arenaWidth - 30, 30) {  // Esquina superior derecha
+    player1Pos(30, 200),  // Esquina superior izquierda
+    player2Pos(770, 200) {  // Esquina superior derecha
     physics = new PhysicsEngine(arenaWidth, arenaHeight);
 }
 
@@ -77,7 +77,7 @@ void GameManager::update(double dt) {
     bool maxBouncesReached = bounces >= MAX_BOUNCES;
 
     // Condición 3: Tiempo máximo
-    bool timeExpired = projectileTimer > 15.0;
+    bool timeExpired = projectileTimer > 100.0;
 
     if (velocityTooLow || maxBouncesReached || timeExpired) {
         endTurn();
@@ -94,16 +94,31 @@ void GameManager::endTurn() {
 }
 
 int GameManager::checkVictory() {
-    int player1Obstacles = 0, player2Obstacles = 0;
+    bool player1CenterDestroyed = false;
+    bool player2CenterDestroyed = false;
 
-    for (auto obs : obstacles) {
-        if (!obs->isDestroyed()) {
-            if (obs->getOwner() == 1) player1Obstacles++;
-            else player2Obstacles++;
+    for (auto obs : obstacles)
+    {
+        if (obs->getMaxResistance() == 50)
+        {
+            if (obs->getOwner() == 1 && obs->isDestroyed())
+            {
+                player1CenterDestroyed = true;
+            }
+            if (obs->getOwner() == 2 && obs->isDestroyed())
+            {
+                player2CenterDestroyed = true;
+            }
         }
     }
 
-    if (player1Obstacles == 0) return 2;
-    if (player2Obstacles == 0) return 1;
+    // Jugador 2 gana si destruye el centro de Jugador 1
+    if (player1CenterDestroyed) return 2;
+
+    // Jugador 1 gana si destruye el centro de Jugador 2
+    if (player2CenterDestroyed) return 1;
+
+    // Nadie ha ganado aún
     return 0;
 }
+

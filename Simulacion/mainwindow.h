@@ -8,6 +8,10 @@
 #include <QSlider>
 #include <QLabel>
 #include <QPushButton>
+#include <QGraphicsLineItem>
+#include <QGraphicsEllipseItem>
+#include <QGraphicsPixmapItem>
+#include <QPixmap>
 #include "GameManager.h"
 
 class MainWindow : public QMainWindow {
@@ -27,9 +31,13 @@ private:
     QLabel* bouncesLabel;
     QPushButton* launchButton;
 
+    QPixmap roofSprites[4];   // 4 estados del techo
+    QPixmap wallSprites[3];   // 3 estados de los muros
+    QPixmap centerSprite;
+
     static constexpr double ARENA_WIDTH = 800;
     static constexpr double ARENA_HEIGHT = 600;
-    static constexpr double DT = 0.03 ;
+    static constexpr double DT = 0.048 ;
     static constexpr double CANNON_LENGTH = 40;
 
     QGraphicsLineItem* cannon1;
@@ -40,6 +48,8 @@ private:
     void setupUI();
     void setupGame();
     void updateGraphics();
+    void loadSprites();
+    QPixmap getSpriteForObstacle(class Obstacle* obs);
 
 private slots:
     void gameLoop();
@@ -48,9 +58,11 @@ private slots:
     void onSpeedChanged(int value);
     void updateCannons();
 
+
 public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
+
 };
 
 #endif
