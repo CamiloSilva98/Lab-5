@@ -32,7 +32,7 @@ void GameObject::setVelocity(Vector2D vel)
 
 void GameObject::update(double dt)
 {
-    position = position + velocity * dt;
+    position = position + velocity * dt + 9.81 * 0.5 * dt * dt;
 }
 
 double GameObject::getMomentum() const
