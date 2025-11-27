@@ -84,7 +84,9 @@ void GameManager::update(double dt) {
     }
 }
 
-void GameManager::endTurn() {
+void GameManager::endTurn()
+{
+    if (currentProjectile && currentProjectile->getGraphicsItem())
     projectileInFlight = false;
     if (currentProjectile) {
         delete currentProjectile;

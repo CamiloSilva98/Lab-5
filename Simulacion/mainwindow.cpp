@@ -265,14 +265,22 @@ void MainWindow::updateGraphics() {
 
         if (bounces >= maxBounces - 1) {
             bouncesLabel->setStyleSheet("QLabel { font-weight: bold; color: red; }");
-        } else {
+        }
+        else
+        {
             bouncesLabel->setStyleSheet("QLabel { font-weight: bold; color: #333; }");
         }
-    } else {
-        if (proj && proj->getGraphicsItem()) {
-            scene->removeItem(proj->getGraphicsItem());
-            delete proj->getGraphicsItem();
-            proj->setGraphicsItem(nullptr);
+    }
+    else
+    {
+        QList<QGraphicsItem*> items = scene->items();
+        for (QGraphicsItem* item : items) {
+            QGraphicsEllipseItem* ellipse = dynamic_cast<QGraphicsEllipseItem*>(item);
+            if (ellipse && ellipse != cannonBase1 && ellipse != cannonBase2) {
+                // Es un proyectil (no es base de cañón)
+                scene->removeItem(ellipse);
+                delete ellipse;
+            }
         }
         bouncesLabel->setText("Rebotes: 0/5");
         bouncesLabel->setStyleSheet("QLabel { font-weight: bold; color: #333; }");
